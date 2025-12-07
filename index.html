@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casio FX-991ES Virtual Calculator</title>
+    <style>
+        :root {
+            --bg-body: #f0f0f0;
+            --calc-body: #1a1a1a;
+            --screen-bg: #9ea792;
+            --btn-dark: #2d2d2d;
+            --btn-light: #525252;
+            --btn-control: #6f7885;
+            --text-white: #ffffff;
+            --text-orange: #d47e33; /* Shift color */
+            --text-red: #c9444d; /* Alpha color */
+            --highlight-green: #67b55b;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-body);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            width: 340px;
+            background-color: var(--calc-body);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #333;
+        }
+
+        /* Brand Header */
+        .brand {
+            color: white;
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+        }
+        .brand span { font-weight: bold; font-size: 14px; }
+
+        /* Display Screen */
+        .screen {
+            background-color: #c7d6c9; /* LCD Color */
+            height: 80px;
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 4px solid #111;
+            padding: 5px 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .expression {
+            font-size: 14px;
+            color: #333;
+            text-align: left;
+            word-wrap: break-word;
+            height: 40px;
+        }
+
+        .result {
+            font-size: 24px;
+            color: #000;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        /* Buttons Grid */
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            height: 35px;
+            box-shadow: 0 3px 0 #000;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #000;
+        }
+
+        /* Specific Button Styles */
+        .btn-round {
+            border-radius: 50%;
+            height: 30px;
+            width: 30px;
+            font-size: 10px;
+            background: #3a3a3a;
+            margin: 0 auto;
+        }
+
+        .btn-oval {
+            background: var(--btn-dark);
+            font-size: 12px;
+        }
+
+        .btn-num {
+            background: var(--btn-light);
+            font-size: 18px;
+            font-weight: bold;
+            height: 45px;
+        }
+
+        .btn-op {
+            background: var(--btn-dark);
+        }
+
+        .btn-action {
+            background: var(--highlight-green);
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        
+        .btn-del {
+            background: var(--highlight-green);
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        /* Layout Helpers */
+        .span-2 { grid-column: span 2; }
+        
+        /* Small label text above buttons (simulated via HTML title or simple visual cues) */
+        .shift-label { color: var(--text-orange); font-size: 10px; display: block; margin-bottom: -5px; }
+        
+        /* Top Control Row */
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .top-btn {
+            background: #666;
+            border-radius: 10px;
+            font-size: 10px;
+            height: 25px;
+            width: 40px;
+        }
+        
+        .shift-btn { background: #8f8539; color: gold; }
+        .alpha-btn { background: #a85d63; color: pink; }
+
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <div class="brand">
+        <div>CASIO <span>fx-991ES PLUS</span></div>
+        <div style="font-size:10px; opacity: 0.7;">NATURAL-V.P.A.M.</div>
+    </div>
+
+    <div class="screen">
+        <div class="expression" id="expression"></div>
+        <div class="result" id="result">0</div>
+    </div>
+
+    <div class="keys" style="margin-bottom: 15px; grid-template-columns: repeat(4, 1fr);">
+        <button class="btn-round shift-btn" onclick="alert('Shift functions (ArcSin etc) auto-enabled for demo!')">SHIFT</button>
+        <button class="btn-round alpha-btn">ALPHA</button>
+        <button class="btn-round top-btn">MODE</button>
+        <button class="btn-round top-btn">ON</button>
+    </div>
+
+    <div class="keys">
+        <button class="btn-oval" onclick="insert('(')">calc</button>
+        <button class="btn-oval" onclick="insert('integral')">∫dx</button>
+        <button class="btn-oval" onclick="insert('^-1')">x⁻¹</button>
+        <button class="btn-oval" onclick="insert('log(')">log</button>
+        <button class="btn-oval" onclick="insert('ln(')">ln</button>
+        <button class="btn-oval" onclick="insert('^')">x□</button>
+
+        <button class="btn-oval" onclick="insert('/')">a/b</button>
+        <button class="btn-oval" onclick="insert('sqrt(')">√</button>
+        <button class="btn-oval" onclick="insert('^2')">x²</button>
+        <button class="btn-oval" onclick="insert('^')">x^</button>
+        <button class="btn-oval" onclick="insert('log(')">logₐ</button>
+        <button class="btn-oval" onclick="insert('ln(')">ln</button>
+
+        <button class="btn-oval" onclick="insert('-')">(-)</button>
+        <button class="btn-oval" onclick="insert('deg')">°' "</button>
+        <button class="btn-oval" onclick="insert('hyp')">hyp</button>
+        <button class="btn-oval" onclick="insert('sin(')">sin</button>
+        <button class="btn-oval" onclick="insert('cos(')">cos</button>
+        <button class="btn-oval" onclick="insert('tan(')">tan</button>
+
+        <button class="btn-oval" onclick="insert('RCL')">RCL</button>
+        <button class="btn-oval" onclick="insert('ENG')">ENG</button>
+        <button class="btn-oval" onclick="insert('(')">(</button>
+        <button class="btn-oval" onclick="insert(')')">)</button>
+        <button class="btn-oval" onclick="insert(',')">,</button>
+        <button class="btn-oval" onclick="insert('M+')">M+</button>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
+
+    <div class="keys" style="grid-template-columns: repeat(5, 1fr);">
+        <button class="btn-num" onclick="insert('7')">7</button>
+        <button class="btn-num" onclick="insert('8')">8</button>
+        <button class="btn-num" onclick="insert('9')">9</button>
+        <button class="btn-del" onclick="backspace()">DEL</button>
+        <button class="btn-del" onclick="clearScreen()">AC</button>
+
+        <button class="btn-num" onclick="insert('4')">4</button>
+        <button class="btn-num" onclick="insert('5')">5</button>
+        <button class="btn-num" onclick="insert('6')">6</button>
+        <button class="btn-num" onclick="insert('*')">×</button>
+        <button class="btn-num" onclick="insert('/')">÷</button>
+
+        <button class="btn-num" onclick="insert('1')">1</button>
+        <button class="btn-num" onclick="insert('2')">2</button>
+        <button class="btn-num" onclick="insert('3')">3</button>
+        <button class="btn-num" onclick="insert('+')">+</button>
+        <button class="btn-num" onclick="insert('-')">-</button>
+
+        <button class="btn-num" onclick="insert('0')">0</button>
+        <button class="btn-num" onclick="insert('.')">.</button>
+        <button class="btn-num" onclick="insert('*10^')">x10ˣ</button>
+        <button class="btn-num" onclick="insertAns()">Ans</button>
+        <button class="btn-num" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    const expressionDiv = document.getElementById('expression');
+    const resultDiv = document.getElementById('result');
+    let currentExp = '';
+    let lastAns = 0;
+
+    function updateDisplay() {
+        // Beautify the display string
+        let displayStr = currentExp
+            .replace(/\*/g, '×')
+            .replace(/\//g, '÷')
+            .replace(/sqrt/g, '√')
+            .replace(/PI/g, 'π');
+        
+        expressionDiv.innerText = displayStr;
+        if(currentExp === '') resultDiv.innerText = '0';
+    }
+
+    function insert(val) {
+        currentExp += val;
+        updateDisplay();
+    }
+
+    function insertAns() {
+        currentExp += lastAns;
+        updateDisplay();
+    }
+
+    function clearScreen() {
+        currentExp = '';
+        resultDiv.innerText = '0';
+        updateDisplay();
+    }
+
+    function backspace() {
+        currentExp = currentExp.slice(0, -1);
+        updateDisplay();
+    }
+
+    function calculate() {
+        try {
+            // Convert standard math notation to JavaScript Math functions
+            let evalStr = currentExp;
+
+            // Handle Pi and E
+            evalStr = evalStr.replace(/π/g, 'Math.PI');
+            evalStr = evalStr.replace(/e/g, 'Math.E');
+
+            // Handle Power (^)
+            // Note: simple replace only works for simple powers. Complex parsing requires a tokenizer.
+            // For this virtual demo, we replace x^y with Math.pow(x,y) for simple cases or use **
+            evalStr = evalStr.replace(/\^/g, '**');
+
+            // Handle Square Root
+            evalStr = evalStr.replace(/sqrt\(/g, 'Math.sqrt(');
+
+            // Handle Trig (JS uses radians, Calculator usually defaults to Degrees)
+            // We'll wrap the inputs.
+            evalStr = evalStr.replace(/sin\(/g, 'Math.sin((Math.PI/180)*');
+            evalStr = evalStr.replace(/cos\(/g, 'Math.cos((Math.PI/180)*');
+            evalStr = evalStr.replace(/tan\(/g, 'Math.tan((Math.PI/180)*');
+
+            // Handle Logs
+            evalStr = evalStr.replace(/log\(/g, 'Math.log10(');
+            evalStr = evalStr.replace(/ln\(/g, 'Math.log(');
+
+            // Evaluate
+            // Using Function constructor is safer than eval() but still allows string execution
+            let result = new Function('return ' + evalStr)();
+
+            // Formatting
+            if (!isFinite(result) || isNaN(result)) {
+                resultDiv.innerText = "Syntax Error";
+            } else {
+                // Round to avoid floating point errors (e.g. 0.0000000004)
+                let rounded = Math.round(result * 1000000000) / 1000000000;
+                resultDiv.innerText = rounded;
+                lastAns = rounded;
+                currentExp = ''; // Clear expression after calc like a real calculator often does, or keep it.
+            }
+
+        } catch (e) {
+            resultDiv.innerText = "Syntax Error";
+            console.error(e);
+        }
+    }
+</script>
+
+</body>
+</html>
